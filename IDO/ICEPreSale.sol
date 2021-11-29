@@ -184,9 +184,9 @@ contract ICEPreSale is Ownable {
     address public  DAOAddress;
     address public mim;
 
-    uint public minAmount; 
-    uint public maxAmount; 
-    uint public salePrice; 
+    uint public minAmount;
+    uint public maxAmount;
+    uint public salePrice;
     uint public endOfSale;
     uint public toTalAmount;
     uint public sellAmount;
@@ -236,7 +236,7 @@ contract ICEPreSale is Ownable {
 
         return true;
     }
-    
+
     function setStart() external onlyOwner() returns (bool) {
         saleStarted = !saleStarted;
         return saleStarted;
@@ -253,7 +253,7 @@ contract ICEPreSale is Ownable {
 
         boughtICE[msg.sender] = true;
 
-        if(endOfSale < block.timestamp){ //时间到
+        if(endOfSale < block.timestamp){
             require(_val <= remainingPurchasesMaxAmt , "remainingPurchasesMaxAmt no good");
         }else{
             require(whiteListed[msg.sender] == true, 'Not whitelisted');
@@ -264,7 +264,7 @@ contract ICEPreSale is Ownable {
         IERC20(alphaICE).safeTransfer(msg.sender, _purchaseAmount);
         return true;
     }
-    
+
     function _calculateSaleQuote(uint paymentAmount_) internal view returns (uint) {
         return uint(1e9).mul(paymentAmount_).div(salePrice);
     }

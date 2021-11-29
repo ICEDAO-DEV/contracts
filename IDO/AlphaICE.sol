@@ -302,3 +302,4 @@ contract AlphaICE is Divine {
         _burn(msg.sender, amount);
     }
 }
+
