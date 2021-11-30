@@ -357,7 +357,7 @@ contract aICEMigration is Ownable {
         address _ICE,
         address _aICE,
         uint256 _maxAmt, //120000000000
-        uint256 _swapDuration
+        uint256 _swapDuration // 2s
     ) public onlyOwner() notInitialized() {
         ICE = IERC20(_ICE);
         aICE = IERC20(_aICE);
@@ -402,5 +402,4 @@ contract aICEMigration is Ownable {
     function setMaxAmt(uint256 val) external onlyOwner() {
         maxAmt = val;
     }
-
 }
