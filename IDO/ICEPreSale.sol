@@ -184,10 +184,11 @@ contract ICEPreSale is Ownable {
     address public  DAOAddress;
     address public mim;
 
-    uint public minAmount;
-    uint public maxAmount;
-    uint public salePrice;
-    uint public endOfSale;
+    uint public minAmount; 
+    uint public maxAmount; 
+    uint public salePrice; 
+    uint public startTimestamp;
+    uint public endTimestamp;
     uint public toTalAmount;
     uint public sellAmount;
     uint public remainingPurchasesMaxAmt;
@@ -202,17 +203,18 @@ contract ICEPreSale is Ownable {
             whiteListed[_buyers[i]] = true;
         }
         return true;
-
     }
 
-    function initialize(address _DAOAddress,
+    function initialize(
+        address _DAOAddress,
         address _alphaICE,
         address _mim,
         uint _minAmount,  //0
         uint _maxAmount,  //1200000000000000000000
         uint _toTalAmount, //300000 000000000000000000
         uint _salePrice,  // 10 * 1e18 （10mim = 1 ice）
-        uint _saleLength, //7200
+        uint _startTimestamp, //7200
+        uint _endTimestamp, //7200
         uint _remainingPurchasesMaxAmt  //600000000000000000000 （600 mim）
         ) external onlyOwner() returns (bool) {
 
@@ -222,7 +224,8 @@ contract ICEPreSale is Ownable {
 
         salePrice = _salePrice; // 10 * 1e18
 
-        endOfSale = _saleLength.add(block.timestamp);
+        startTimestamp = _startTimestamp;
+        endTimestamp = _endTimestamp;
 
         DAOAddress = _DAOAddress;
 
@@ -234,15 +237,16 @@ contract ICEPreSale is Ownable {
 
         remainingPurchasesMaxAmt = _remainingPurchasesMaxAmt;
 
+        saleStarted = true;
         return true;
     }
-
+    
     function setStart() external onlyOwner() returns (bool) {
         saleStarted = !saleStarted;
         return saleStarted;
     }
 
-    function purchaseaICE(uint256 _val) external payable returns (bool) {
+    function purchaseaICE(uint256 _val) external returns (bool) {
 
         require(_val >= minAmount, 'Below minimum allocation');
         require(_val <= maxAmount, 'More than allocation');
@@ -250,21 +254,23 @@ contract ICEPreSale is Ownable {
         require(sellAmount <= toTalAmount, 'More than allocation');
         require(saleStarted == true, 'Not started');
         require(boughtICE[msg.sender] == false, 'Already participated');
+        require(startTimestamp < block.timestamp,"Not started yet");
 
         boughtICE[msg.sender] = true;
 
-        if(endOfSale < block.timestamp){
+        if(endTimestamp < block.timestamp){
             require(_val <= remainingPurchasesMaxAmt , "remainingPurchasesMaxAmt no good");
         }else{
             require(whiteListed[msg.sender] == true, 'Not whitelisted');
-            require(block.timestamp < endOfSale, 'Sale over');
+            require(block.timestamp < endTimestamp, 'Sale over');
         }
-        IERC20(mim).safeTransferFrom(msg.sender ,DAOAddress, _val);
+        IERC20(mim).safeTransferFrom(msg.sender ,address(this), _val);
+        IERC20(mim).safeTransfer(DAOAddress, _val);
         uint _purchaseAmount = _calculateSaleQuote(_val);
         IERC20(alphaICE).safeTransfer(msg.sender, _purchaseAmount);
         return true;
     }
-
+    
     function _calculateSaleQuote(uint paymentAmount_) internal view returns (uint) {
         return uint(1e9).mul(paymentAmount_).div(salePrice);
     }

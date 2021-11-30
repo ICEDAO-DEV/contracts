@@ -262,7 +262,7 @@ interface IBondCalculator {
     returns (uint256 _value);
 }
 
-contract MockOlympusTreasury is Ownable {
+contract Treasury is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
